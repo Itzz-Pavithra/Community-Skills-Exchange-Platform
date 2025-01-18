@@ -1,3 +1,13 @@
+
+
+<?php
+require_once 'templates/db.php';
+// Add this to the top of create-profile.php
+$dbPath = __DIR__ . '/db.php';
+echo "Looking for db.php at: " . $dbPath . "<br>";
+echo "File exists: " . (file_exists($dbPath) ? "Yes" : "No") . "<br>";
+echo "File readable: " . (is_readable($dbPath) ? "Yes" : "No") . "<br>";
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +31,7 @@
         <div class="container">
             <h1 class="animate__animated animate__fadeIn">Create Your Profile</h1>
             
-            <form id="profileForm" class="profile-form animate__animated animate__fadeInUp">
+            <form id="profileForm" class="profile-form animate__animated animate__fadeInUp" method="POST" action="save_profile.php">
                 <div class="form-section personal-info">
                     <h2>Personal Information</h2>
                     
@@ -90,5 +100,6 @@
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="assets/js/map.js"></script>
+    <script src="assets/js/form.js"></script>
 </body>
 </html>

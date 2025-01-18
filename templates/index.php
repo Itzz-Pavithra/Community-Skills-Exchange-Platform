@@ -28,7 +28,7 @@
             <a href="create-profile.php" class="cta-button">Get Started</a>
         </div>
         <div class="hero-image animate__animated animate__fadeInRight">
-            <img src="assets/images/community.svg" alt="Community Illustration">
+            <img src="assets/images/community.jpg" alt="Community Illustration">
         </div>
     </header>
 

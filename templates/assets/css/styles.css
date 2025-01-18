@@ -102,7 +102,15 @@ body {
 .hero-image img {
     max-width: 100%;
     height: auto;
+    border-radius: 15px; /* Rounded corners */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
 }
+
+.hero-image img:hover {
+    transform: scale(0.95); /* Slightly reduce size */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Add shadow effect */
+}
+
 
 /* CTA Button */
 .cta-button {
