@@ -1,12 +1,5 @@
-
-
 <?php
-require_once 'templates/db.php';
-// Add this to the top of create-profile.php
-$dbPath = __DIR__ . '/db.php';
-echo "Looking for db.php at: " . $dbPath . "<br>";
-echo "File exists: " . (file_exists($dbPath) ? "Yes" : "No") . "<br>";
-echo "File readable: " . (is_readable($dbPath) ? "Yes" : "No") . "<br>";
+require_once 'db.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

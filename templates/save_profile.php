@@ -1,53 +1,74 @@
 <?php
-require_once 'config/db.php';
+// Set header to JSON
+header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        // Collect form data
-        $profileData = [
-            'username' => $_POST['username'],
-            'email' => $_POST['email'],
-            'skills' => [],
-            'address' => $_POST['address'],
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+try {
+    require_once __DIR__ . '/templates/db.php';
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Validate and sanitize input data
+        $username = filter_var($_POST['username'], FILTER_SANITIZE_STRING);
+        $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+        $address = filter_var($_POST['address'], FILTER_SANITIZE_STRING);
+        $latitude = filter_var($_POST['latitude'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+        $longitude = filter_var($_POST['longitude'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+
+        // Validate required fields
+        if (empty($username) || empty($email) || empty($address)) {
+            throw new Exception("Required fields cannot be empty");
+        }
+
+        // Process skills array
+        $skills = [];
+        if (isset($_POST['skills']) && is_array($_POST['skills'])) {
+            foreach ($_POST['skills'] as $key => $skill) {
+                $skills[] = [
+                    'name' => filter_var($skill, FILTER_SANITIZE_STRING),
+                    'level' => filter_var($_POST['skillLevels'][$key], FILTER_SANITIZE_STRING)
+                ];
+            }
+        }
+
+        // Create user document
+        $userDocument = [
+            'username' => $username,
+            'email' => $email,
+            'skills' => $skills,
             'location' => [
-                'type' => 'Point',
+                'address' => $address,
                 'coordinates' => [
-                    (float)$_POST['longitude'],
-                    (float)$_POST['latitude']
+                    'latitude' => (float)$latitude,
+                    'longitude' => (float)$longitude
                 ]
             ],
-            'created_at' => new MongoDB\BSON\UTCDateTime()
+            'created_at' => new MongoDB\BSON\UTCDateTime(time() * 1000)
         ];
 
-        // Process skills
-        foreach ($_POST['skills'] as $index => $skill) {
-            $profileData['skills'][] = [
-                'name' => $skill,
-                'level' => $_POST['skillLevels'][$index]
-            ];
-        }
+        // Insert document into collection
+        $result = $collection->insertOne($userDocument);
 
-        // Insert into MongoDB
-        $result = $collection->insertOne($profileData);
-
-        if ($result->getInsertedCount() > 0) {
-            $response = [
+        if ($result->getInsertedCount() === 1) {
+            echo json_encode([
                 'success' => true,
-                'message' => 'Profile created successfully!'
-            ];
+                'message' => 'Profile created successfully!',
+                'userId' => (string)$result->getInsertedId()
+            ]);
         } else {
-            throw new Exception('Failed to create profile');
+            throw new Exception("Failed to insert user document");
         }
-
-    } catch (Exception $e) {
-        $response = [
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage()
-        ];
+    } else {
+        throw new Exception("Invalid request method");
     }
-
-    // Send JSON response
-    header('Content-Type: application/json');
-    echo json_encode($response);
-    exit;
+} catch (Exception $e) {
+    // Return error in JSON format
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
+?>
